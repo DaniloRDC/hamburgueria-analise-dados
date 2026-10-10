@@ -1,0 +1,217 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f4f7fb">
+  <meta name="description" content="Dashboard interativo para explorar vendas, faturamento, categorias e regiões.">
+  <title>Vértice Burguer Lab | Análise de vendas</title>
+  <link rel="stylesheet" href="styles.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js" defer></script>
+  <script src="dados-embutidos.js" defer></script>
+  <script src="script.js" defer></script>
+</head>
+<body>
+  <main class="page-shell">
+    <header class="topbar">
+      <a class="brand" href="#inicio" aria-label="Painel de vendas, início">
+        <span class="brand-mark" aria-hidden="true">V</span>
+        <span class="brand-name">Vértice <span>· Burguer Lab</span></span>
+      </a>
+      <nav class="main-nav" aria-label="Navegação principal">
+        <a href="#inicio">Início</a>
+        <a href="#filtros">Filtros</a>
+        <a href="#indicadores">Indicadores</a>
+        <a href="#graficos">Gráficos</a>
+        <a href="#vendas">Vendas</a>
+      </nav>
+      <span class="course-label"><span class="status-dot"></span> Fundamentos de IA e Análise de Dados</span>
+    </header>
+
+    <section class="intro" id="inicio" aria-labelledby="page-title">
+      <div class="intro-copy">
+        <p class="eyebrow">PAINEL DE DESEMPENHO</p>
+        <h1 id="page-title">Análise do Burguer Lab</h1>
+        <p class="intro-text">Explore a evolução do faturamento da hamburgueria e compare lanches, bebidas, acompanhamentos e sobremesas.</p>
+      </div>
+      <div class="intro-actions">
+        <span class="demo-badge" id="source-badge"><span aria-hidden="true">●</span> Base original · 1.367 registros</span>
+        <label class="button button-primary file-button" id="upload-trigger"><span aria-hidden="true">↑</span> <span class="upload-label">Importar CSV</span><input id="csv-file" class="visually-hidden" type="file" accept=".csv,text/csv"></label>
+      </div>
+    </section>
+
+    <section class="product-showcase" aria-labelledby="showcase-title">
+      <div class="showcase-heading">
+        <div><p class="eyebrow">CATÁLOGO DA BASE</p><h2 id="showcase-title">O que está vendendo?</h2></div>
+        <span class="showcase-note">Produtos encontrados em vendas_hamburgueria.csv</span>
+      </div>
+      <div class="product-strip">
+        <article class="product-card">
+          <img src="https://images.unsplash.com/photo-1568901346375-23c9450c58cd?auto=format&fit=crop&w=480&q=82" alt="Hambúrguer artesanal" loading="lazy">
+          <div class="product-overlay"><span>Lanches</span><strong>X-Bacon · X-Burger</strong></div>
+        </article>
+        <article class="product-card">
+          <img src="https://images.unsplash.com/photo-1550317138-10000687a72b?auto=format&fit=crop&w=480&q=82" alt="X-Salada e X-Tudo" loading="lazy">
+          <div class="product-overlay"><span>Lanches</span><strong>X-Salada · X-Tudo</strong></div>
+        </article>
+        <article class="product-card">
+          <img src="https://images.unsplash.com/photo-1573080496219-bb080dd4f877?auto=format&fit=crop&w=480&q=82" alt="Porção de batata frita" loading="lazy">
+          <div class="product-overlay"><span>Acompanhamento</span><strong>Batata Frita</strong></div>
+        </article>
+        <article class="product-card">
+          <img src="https://images.unsplash.com/photo-1544145945-f90425340c7e?auto=format&fit=crop&w=480&q=82" alt="Bebidas coloridas" loading="lazy">
+          <div class="product-overlay"><span>Bebidas</span><strong>Refrigerante · Suco</strong></div>
+        </article>
+        <article class="product-card">
+          <img src="https://images.unsplash.com/photo-1572490122747-3968b75cc699?auto=format&fit=crop&w=480&q=82" alt="Milkshake cremoso" loading="lazy">
+          <div class="product-overlay"><span>Sobremesa</span><strong>Milkshake</strong></div>
+        </article>
+      </div>
+    </section>
+
+    <section class="filter-panel panel" id="filtros" aria-labelledby="filter-title">
+      <div class="section-heading filter-heading">
+        <div>
+          <p class="eyebrow">EXPLORE OS DADOS</p>
+          <h2 id="filter-title">Filtros</h2>
+        </div>
+        <button class="button button-quiet" id="clear-filters" type="button"><span aria-hidden="true">↺</span> Limpar filtros</button>
+      </div>
+      <div class="filter-grid">
+        <div class="control-group date-group">
+          <label for="date-from">Período</label>
+          <div class="date-inputs">
+            <input id="date-from" type="date" aria-label="Data inicial">
+            <span aria-hidden="true">até</span>
+            <input id="date-to" type="date" aria-label="Data final">
+          </div>
+        </div>
+        <div class="control-group">
+          <label for="category-filter">Categoria</label>
+          <select id="category-filter"><option value="">Todas as categorias</option></select>
+        </div>
+        <div class="control-group">
+          <label for="region-filter">Região</label>
+          <select id="region-filter"><option value="">Todas as regiões</option></select>
+        </div>
+      </div>
+      <p class="filter-hint" id="filter-hint">Os indicadores e gráficos consideram os filtros acima.</p>
+    </section>
+
+    <section class="metrics-section" id="indicadores" aria-labelledby="metrics-title">
+      <div class="section-heading compact-heading">
+        <div><p class="eyebrow">VISÃO GERAL</p><h2 id="metrics-title">Indicadores</h2></div>
+        <p class="record-count" id="record-count" aria-live="polite">0 registros</p>
+      </div>
+      <div class="metric-grid">
+        <article class="metric-card metric-highlight">
+          <div class="metric-top"><span class="metric-icon icon-blue" aria-hidden="true">R$</span><span class="metric-label">Faturamento total</span></div>
+          <p class="metric-value" id="total-revenue">R$ 0,00</p>
+          <p class="metric-note">Soma das vendas filtradas</p>
+        </article>
+        <article class="metric-card">
+          <div class="metric-top"><span class="metric-icon icon-green" aria-hidden="true">↗</span><span class="metric-label">Vendas</span></div>
+          <p class="metric-value" id="sale-count">0</p>
+          <p class="metric-note">IDs de venda únicos</p>
+        </article>
+        <article class="metric-card">
+          <div class="metric-top"><span class="metric-icon icon-amber" aria-hidden="true">▦</span><span class="metric-label">Unidades vendidas</span></div>
+          <p class="metric-value" id="unit-count">0</p>
+          <p class="metric-note">Soma das quantidades</p>
+        </article>
+        <article class="metric-card">
+          <div class="metric-top"><span class="metric-icon icon-purple" aria-hidden="true">◉</span><span class="metric-label">Ticket médio</span></div>
+          <p class="metric-value" id="average-ticket">R$ 0,00</p>
+          <p class="metric-note">Faturamento ÷ vendas únicas</p>
+        </article>
+      </div>
+    </section>
+
+    <section class="charts-grid" id="graficos" aria-label="Gráficos de faturamento">
+      <article class="panel chart-panel chart-wide">
+        <div class="section-heading chart-heading">
+          <div><p class="eyebrow">TENDÊNCIA</p><h2>Faturamento mensal</h2></div>
+          <span class="chart-unit">Em reais (R$)</span>
+        </div>
+        <div class="chart-wrap"><canvas id="monthly-chart" role="img" aria-label="Gráfico de linhas do faturamento por mês"></canvas></div>
+        <p class="chart-caption">A soma mensal inclui os meses sem vendas como zero.</p>
+      </article>
+      <article class="panel chart-panel">
+        <div class="section-heading chart-heading">
+          <div><p class="eyebrow">COMPOSIÇÃO</p><h2>Por categoria</h2></div>
+          <span class="chart-unit">Em reais (R$)</span>
+        </div>
+        <div class="chart-wrap"><canvas id="category-chart" role="img" aria-label="Gráfico de barras do faturamento por categoria"></canvas></div>
+        <p class="chart-caption">Categorias ordenadas pelo faturamento.</p>
+      </article>
+      <article class="panel chart-panel">
+        <div class="section-heading chart-heading">
+          <div><p class="eyebrow">COMPARAÇÃO</p><h2>Por região</h2></div>
+          <span class="chart-unit">Em reais (R$)</span>
+        </div>
+        <div class="chart-wrap"><canvas id="region-chart" role="img" aria-label="Gráfico de barras do faturamento por região"></canvas></div>
+        <p class="chart-caption">Regiões ordenadas pelo faturamento.</p>
+      </article>
+      <article class="panel chart-panel">
+        <div class="section-heading chart-heading">
+          <div><p class="eyebrow">MIX DE RECEITA</p><h2>Participação por categoria</h2></div>
+          <span class="chart-unit">Percentual do total</span>
+        </div>
+        <div class="chart-wrap chart-wrap-compact"><canvas id="category-share-chart" role="img" aria-label="Gráfico de rosca da participação do faturamento por categoria"></canvas></div>
+        <p class="chart-caption">Cada segmento representa a fatia da receita filtrada.</p>
+      </article>
+      <article class="panel chart-panel">
+        <div class="section-heading chart-heading">
+          <div><p class="eyebrow">VOLUME DE ITENS</p><h2>Unidades por produto</h2></div>
+          <span class="chart-unit">Quantidade vendida</span>
+        </div>
+        <div class="chart-wrap chart-wrap-compact"><canvas id="product-volume-chart" role="img" aria-label="Gráfico polar das unidades vendidas por produto"></canvas></div>
+        <p class="chart-caption">Produtos com maior volume aparecem nas áreas maiores.</p>
+      </article>
+    </section>
+
+    <section class="panel table-panel" id="vendas" aria-labelledby="table-title">
+      <div class="section-heading table-heading">
+        <div><p class="eyebrow">DETALHAMENTO</p><h2 id="table-title">Vendas</h2><p class="table-subtitle" id="table-count">0 linhas</p></div>
+        <div class="table-actions">
+          <div class="search-box"><span aria-hidden="true">⌕</span><label class="visually-hidden" for="table-search">Pesquisar nas vendas</label><input id="table-search" type="search" placeholder="Pesquisar vendas…" autocomplete="off"></div>
+          <button class="button button-outline" id="export-csv" type="button"><span aria-hidden="true">↓</span> Exportar CSV</button>
+        </div>
+      </div>
+      <div class="message-box" id="data-message" role="status" hidden></div>
+      <div class="empty-state" id="empty-state" hidden>
+        <span class="empty-mark" aria-hidden="true">⌕</span>
+        <h3>Nenhuma venda encontrada</h3>
+        <p>Altere os filtros ou a pesquisa para ver os registros.</p>
+      </div>
+      <div class="table-scroll" id="table-scroll">
+        <table>
+          <thead><tr>
+            <th scope="col" data-key="id_venda"><button type="button" class="sort-button" aria-label="Ordenar por ID da venda">ID da venda <span aria-hidden="true">↕</span></button></th>
+            <th scope="col" data-key="data"><button type="button" class="sort-button" aria-label="Ordenar por data">Data <span aria-hidden="true">↕</span></button></th>
+            <th scope="col" data-key="produto"><button type="button" class="sort-button" aria-label="Ordenar por produto">Produto <span aria-hidden="true">↕</span></button></th>
+            <th scope="col" data-key="categoria"><button type="button" class="sort-button" aria-label="Ordenar por categoria">Categoria <span aria-hidden="true">↕</span></button></th>
+            <th scope="col" data-key="regiao"><button type="button" class="sort-button" aria-label="Ordenar por região">Região <span aria-hidden="true">↕</span></button></th>
+            <th scope="col" data-key="quantidade" class="numeric"><button type="button" class="sort-button" aria-label="Ordenar por quantidade">Unidades <span aria-hidden="true">↕</span></button></th>
+            <th scope="col" data-key="preco_unitario" class="numeric"><button type="button" class="sort-button" aria-label="Ordenar por preço unitário">Preço unitário <span aria-hidden="true">↕</span></button></th>
+            <th scope="col" data-key="faturamento" class="numeric"><button type="button" class="sort-button" aria-label="Ordenar por faturamento">Faturamento <span aria-hidden="true">↕</span></button></th>
+          </tr></thead>
+          <tbody id="sales-table-body"></tbody>
+        </table>
+      </div>
+      <p class="table-footnote">Faturamento por linha = unidades × preço unitário.</p>
+    </section>
+
+    <footer class="page-footer">
+      <p>Feito para aprender com dados. Valores calculados a partir das linhas válidas da base carregada.</p>
+      <div class="footer-links">
+        <span>Autor: <strong>Danilo Rodrigues da Costa</strong></span>
+        <a href="https://github.com/DaniloRDC" target="_blank" rel="noopener noreferrer">GitHub</a>
+        <a href="mailto:rodriguesdacostadanilowork@gmail.com">E-mail</a>
+        <a href="../README.md">Como usar</a>
+      </div>
+    </footer>
+  </main>
+</body>
+</html>
